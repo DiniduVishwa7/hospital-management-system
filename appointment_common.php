@@ -288,7 +288,7 @@ function mcPageTop(string $title, string $subtitle): void
             <li><a href="patients.php"><i class="bi bi-people-fill"></i> Patients</a></li>
             <li><a href="doctors.php"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
             <li><a href="appointments.php" class="active"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
-            <li><a href="#"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
+            <li><a href="medical_records.php"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
             <li>
                 <form action="logout.php" method="POST">
                     <input type="hidden" name="logout_token" value="{$logoutToken}">
