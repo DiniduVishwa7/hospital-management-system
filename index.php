@@ -1,33 +1,56 @@
 
 <?php
 
-// Load the database connection
+// Configure session cookie security
+session_set_cookie_params([
+    "httponly" => true,
+    "secure" => !empty($_SERVER["HTTPS"])
+        && $_SERVER["HTTPS"] !== "off",
+    "samesite" => "Lax"
+]);
+
+// Start or resume the administrator session
+session_start();
+
+// Prevent the browser from caching private pages
+header("Cache-Control: no-store, no-cache, must-revalidate");
+
+// Check whether the administrator is logged in
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Generate token for secure logout
+if (empty($_SESSION["logout_token"])) {
+    $_SESSION["logout_token"] = bin2hex(random_bytes(32));
+}
+
+// Connect to MySQL
 require_once __DIR__ . "/config/database.local.php";
 
 $pageTitle = "Dashboard";
 
-// Get total number of patients
+// Retrieve actual hospital statistics
 $totalPatients = $pdo->query(
     "SELECT COUNT(*) FROM patients"
 )->fetchColumn();
 
-// Get total number of doctors
 $totalDoctors = $pdo->query(
     "SELECT COUNT(*) FROM doctors"
 )->fetchColumn();
 
-// Get total number of appointments
 $totalAppointments = $pdo->query(
     "SELECT COUNT(*) FROM appointments"
 )->fetchColumn();
 
-// Get appointments scheduled for today
 $todayAppointments = $pdo->query(
     "SELECT COUNT(*) FROM appointments
      WHERE appointment_date = CURDATE()"
 )->fetchColumn();
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +66,9 @@ $todayAppointments = $pdo->query(
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    
+<link rel="stylesheet" href="assets/css/style.css?v=2">
+
 </head>
 <body>
 
@@ -67,7 +92,26 @@ $todayAppointments = $pdo->query(
             <li><a href="#"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
             <li><a href="#"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
             <li><a href="#"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
-            <li><a href="#"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            
+<li>
+    <form action="logout.php" method="POST">
+        <input
+            type="hidden"
+            name="logout_token"
+            value="<?php echo htmlspecialchars(
+                $_SESSION['logout_token'],
+                ENT_QUOTES,
+                'UTF-8'
+            ); ?>"
+        >
+
+        <button type="submit" class="logout-button">
+            <i class="bi bi-box-arrow-right"></i>
+            Logout
+        </button>
+    </form>
+</li>
+
         </ul>
     </aside>
 

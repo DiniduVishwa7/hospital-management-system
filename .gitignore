@@ -13,3 +13,5 @@ vendor/
 node_modules/
 
 /test_connection.php
+/setup_admin.php
+/add_admin.php

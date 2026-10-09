@@ -303,3 +303,51 @@ a {
         font-size: 28px;
     }
 }
+
+/* Sidebar Logout Button */
+
+
+/* ==================================
+   LOGOUT BUTTON - SIDEBAR
+   ================================== */
+
+.sidebar-menu li form {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu .logout-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    padding: 12px 14px;
+
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+
+    color: #dbeafe;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: left;
+
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.sidebar-menu .logout-button i {
+    font-size: 16px;
+}
+
+.sidebar-menu .logout-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.sidebar-menu .logout-button:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+}
