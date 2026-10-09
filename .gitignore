@@ -11,3 +11,5 @@ config/database.local.php
 *.tmp
 vendor/
 node_modules/
+
+/test_connection.php

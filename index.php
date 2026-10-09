@@ -1,11 +1,32 @@
+
 <?php
+
+// Load the database connection
+require_once __DIR__ . "/config/database.local.php";
+
 $pageTitle = "Dashboard";
 
-// Temporary stats until database connection
-$totalPatients = 128;
-$totalDoctors = 24;
-$totalAppointments = 56;
-$todayAppointments = 12;
+// Get total number of patients
+$totalPatients = $pdo->query(
+    "SELECT COUNT(*) FROM patients"
+)->fetchColumn();
+
+// Get total number of doctors
+$totalDoctors = $pdo->query(
+    "SELECT COUNT(*) FROM doctors"
+)->fetchColumn();
+
+// Get total number of appointments
+$totalAppointments = $pdo->query(
+    "SELECT COUNT(*) FROM appointments"
+)->fetchColumn();
+
+// Get appointments scheduled for today
+$todayAppointments = $pdo->query(
+    "SELECT COUNT(*) FROM appointments
+     WHERE appointment_date = CURDATE()"
+)->fetchColumn();
+
 ?>
 
 <!DOCTYPE html>
@@ -153,25 +174,20 @@ $todayAppointments = 12;
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>John Perera</td>
-                                        <td>Dr. Silva</td>
-                                        <td>2026-10-08</td>
-                                        <td><span class="badge bg-success">Confirmed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Nadeesha Fernando</td>
-                                        <td>Dr. Jayasinghe</td>
-                                        <td>2026-10-08</td>
-                                        <td><span class="badge bg-warning text-dark">Pending</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Amal Peris</td>
-                                        <td>Dr. Perera</td>
-                                        <td>2026-10-09</td>
-                                        <td><span class="badge bg-primary">Scheduled</span></td>
-                                    </tr>
-                                </tbody>
+    <tr>
+        <td colspan="4" class="text-center py-5">
+            <i class="bi bi-calendar-x text-secondary fs-2"></i>
+
+            <p class="text-muted mt-3 mb-0">
+                No appointments available yet.
+            </p>
+
+            <small class="text-muted">
+                New appointments will appear here.
+            </small>
+        </td>
+    </tr>
+</tbody>
                             </table>
                         </div>
                     </div>
