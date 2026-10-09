@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.env
+.env.*
+!.env.example
+config.local.php
+config/database.local.php
+*.log
+*.tmp
+vendor/
+node_modules/
