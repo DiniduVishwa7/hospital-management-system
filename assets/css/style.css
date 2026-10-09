@@ -351,3 +351,64 @@ a {
     outline: 2px solid #93c5fd;
     outline-offset: 2px;
 }
+
+
+/* ==================================
+   ADD PATIENT FORM
+   ================================== */
+
+.patient-form-card {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.patient-form-icon {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 16px;
+    font-size: 26px;
+}
+
+.patient-form-card .form-label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 9px;
+}
+
+.patient-form-card .form-control,
+.patient-form-card .form-select {
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 15px;
+    transition: 0.2s ease;
+}
+
+.patient-form-card .form-control:focus,
+.patient-form-card .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.patient-form-card .btn {
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-weight: 600;
+}
+
+.patient-form-card .btn-primary {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.patient-form-card .btn-primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
