@@ -1,20 +1,6 @@
 <?php
-
-// Use the same secure session settings as login.php and index.php.
-session_set_cookie_params([
-    "httponly" => true,
-    "secure" => !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off",
-    "samesite" => "Lax"
-]);
-
-session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate");
-
-// Only signed-in administrators may register a patient.
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
+// Central authentication/session setup shared by MediCore protected pages.
+require_once __DIR__ . '/auth_guard.php';
 
 require_once __DIR__ . "/config/database.local.php";
 

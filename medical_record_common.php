@@ -1,20 +1,7 @@
 <?php
-/**
- * MediCore Medical Records: authentication, database access, validation,
- * reusable form and layout functions. Educational demo: fictional data only.
- */
-session_set_cookie_params([
-    'httponly' => true,
-    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-    'samesite' => 'Lax'
-]);
-session_start();
-header('Cache-Control: no-store, no-cache, must-revalidate');
+// Central authentication/session setup shared by MediCore protected pages.
+require_once __DIR__ . '/auth_guard.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
 require_once __DIR__ . '/config/database.local.php';
 
 if (empty($_SESSION['logout_token'])) {

@@ -1,23 +1,6 @@
 <?php
-/**
- * MediCore Appointment Management shared helpers.
- * Keep this file alongside appointments.php, add_appointment.php,
- * edit_appointment.php, and delete_appointment.php.
- */
-
-// Match the session settings already used by the MediCore login/logout pages.
-session_set_cookie_params([
-    'httponly' => true,
-    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-    'samesite' => 'Lax'
-]);
-session_start();
-header('Cache-Control: no-store, no-cache, must-revalidate');
-
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
+// Central authentication/session setup shared by MediCore protected pages.
+require_once __DIR__ . '/auth_guard.php';
 
 require_once __DIR__ . '/config/database.local.php';
 

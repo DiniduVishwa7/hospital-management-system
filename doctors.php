@@ -1,22 +1,9 @@
 <?php
-
-// Use the same secure session settings as the MediCore dashboard.
-session_set_cookie_params([
-    "httponly" => true,
-    "secure" => !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off",
-    "samesite" => "Lax"
-]);
-
-session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate");
-
-// Doctors are visible only to signed-in administrators.
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
+// Central authentication/session setup shared by MediCore protected pages.
+require_once __DIR__ . '/auth_guard.php';
 
 require_once __DIR__ . "/config/database.local.php";
+require_once __DIR__ . "/directory_search.php";
 
 $pageTitle = "Doctors";
 
@@ -24,14 +11,46 @@ if (empty($_SESSION["logout_token"])) {
     $_SESSION["logout_token"] = bin2hex(random_bytes(32));
 }
 
-// Load doctor records using the existing doctors table.
-$statement = $pdo->query(
-    "SELECT doctor_id, full_name, specialization, phone, email
-     FROM doctors
-     ORDER BY doctor_id DESC"
+// Search by name, specialization, email or doctor ID.
+$search = mdSearchText($_GET, 'q');
+$specialization = mdSearchText($_GET, 'specialization', 100);
+$specializations = $pdo->query(
+    "SELECT DISTINCT specialization FROM doctors ORDER BY specialization ASC"
+)->fetchAll(PDO::FETCH_COLUMN);
+if (!in_array($specialization, $specializations, true)) {
+    $specialization = '';
+}
+$conditions = [];
+$params = [];
+if ($search !== '') {
+    $parts = [
+        "d.full_name LIKE :q_name ESCAPE '!'",
+        "d.specialization LIKE :q_specialty ESCAPE '!'",
+        "d.email LIKE :q_email ESCAPE '!'"];
+    $pattern = mdLikePattern($search);
+    $params['q_name'] = $pattern;
+    $params['q_specialty'] = $pattern;
+    $params['q_email'] = $pattern;
+    $searchedId = mdSearchId($search);
+    if ($searchedId !== null) {
+        $parts[] = 'd.doctor_id = :q_id';
+        $params['q_id'] = $searchedId;
+    }
+    $conditions[] = '(' . implode(' OR ', $parts) . ')';
+}
+if ($specialization !== '') {
+    $conditions[] = 'd.specialization = :specialization';
+    $params['specialization'] = $specialization;
+}
+$where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
+$statement = $pdo->prepare(
+    'SELECT d.doctor_id, d.full_name, d.specialization, d.phone, d.email
+     FROM doctors AS d' . $where . ' ORDER BY d.doctor_id DESC'
 );
+$statement->execute($params);
 $doctors = $statement->fetchAll(PDO::FETCH_ASSOC);
-$totalDoctors = count($doctors);
+$totalDoctors = (int) $pdo->query('SELECT COUNT(*) FROM doctors')->fetchColumn();
+$hasFilters = $search !== '' || $specialization !== '';
 
 // Show a one-time confirmation after creating, updating or deleting a doctor.
 $success = $_SESSION["doctor_success"] ?? "";
@@ -126,6 +145,33 @@ function escapeHtml($value): string
                 </a>
             </div>
 
+            <form method="GET" action="doctors.php" role="search" class="row g-3 align-items-end mb-3">
+                <div class="col-lg-6">
+                    <label for="doctor_search" class="form-label fw-semibold">Search doctors</label>
+                    <input id="doctor_search" name="q" type="search" class="form-control"
+                           value="<?php echo escapeHtml($search); ?>" maxlength="100"
+                           placeholder="Name, specialization, email or doctor ID">
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label for="doctor_specialization" class="form-label fw-semibold">Specialization</label>
+                    <select id="doctor_specialization" name="specialization" class="form-select">
+                        <option value="">All specializations</option>
+                        <?php foreach ($specializations as $option): ?>
+                            <option value="<?php echo escapeHtml($option); ?>" <?php echo $specialization === $option ? 'selected' : ''; ?>>
+                                <?php echo escapeHtml($option); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-3 d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Search</button>
+                    <a href="doctors.php" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+            <p class="text-muted small mb-3" aria-live="polite">
+                Showing <?php echo count($doctors); ?> of <?php echo $totalDoctors; ?> doctors<?php echo $hasFilters ? ' (filtered)' : ''; ?>.
+            </p>
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -143,9 +189,9 @@ function escapeHtml($value): string
                             <tr>
                                 <td colspan="6" class="text-center py-5">
                                     <i class="bi bi-person-badge text-secondary fs-1"></i>
-                                    <h6 class="mt-3">No doctors registered yet</h6>
+                                    <h6 class="mt-3"><?php echo $hasFilters ? 'No matching doctors found' : 'No doctors registered yet'; ?></h6>
                                     <p class="text-muted mb-0">
-                                        New doctors will appear here once they are added.
+                                        <?php echo $hasFilters ? 'Try another search or click Clear.' : 'New doctors will appear here once they are added.'; ?>
                                     </p>
                                 </td>
                             </tr>

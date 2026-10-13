@@ -1,0 +1,5 @@
+# Block direct browser access to private configuration and SQL files.
+# PHP require/include from the application continues to work.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

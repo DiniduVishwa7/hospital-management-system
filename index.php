@@ -1,24 +1,6 @@
 <?php
-
-// Configure session cookie security.
-session_set_cookie_params([
-    "httponly" => true,
-    "secure" => !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off",
-    "samesite" => "Lax"
-]);
-
-session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate");
-
-// Only allow authenticated administrators to view the dashboard.
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
-
-if (empty($_SESSION["logout_token"])) {
-    $_SESSION["logout_token"] = bin2hex(random_bytes(32));
-}
+// Central authentication/session setup shared by MediCore protected pages.
+require_once __DIR__ . '/auth_guard.php';
 
 require_once __DIR__ . "/config/database.local.php";
 
@@ -29,6 +11,37 @@ $totalAppointments = $pdo->query("SELECT COUNT(*) FROM appointments")->fetchColu
 $todayAppointments = $pdo->query(
     "SELECT COUNT(*) FROM appointments WHERE appointment_date = CURDATE()"
 )->fetchColumn();
+
+// Show the five appointments most recently added to MediCore.
+// Patient and doctor names come directly from the database.
+$recentStatement = $pdo->query(
+    "SELECT a.appointment_id, a.appointment_date, a.appointment_time, a.status,
+            p.full_name AS patient_name,
+            d.full_name AS doctor_name
+     FROM appointments AS a
+     INNER JOIN patients AS p ON p.patient_id = a.patient_id
+     INNER JOIN doctors AS d ON d.doctor_id = a.doctor_id
+     ORDER BY a.created_at DESC, a.appointment_id DESC
+     LIMIT 5"
+);
+$recentAppointments = $recentStatement->fetchAll(PDO::FETCH_ASSOC);
+
+// Escape all data printed into HTML, including database-sourced names.
+function dashboardEscape($value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+// Match the appointment statuses used by the booking module.
+function dashboardStatusClass(string $status): string
+{
+    return match ($status) {
+        'Scheduled' => 'text-bg-primary',
+        'Completed' => 'text-bg-success',
+        'Cancelled' => 'text-bg-secondary',
+        default => 'text-bg-secondary',
+    };
+}
 
 ?>
 <!DOCTYPE html>
@@ -103,7 +116,7 @@ $todayAppointments = $pdo->query(
                         Manage patients, doctors, appointments, and medical records
                         from one clean and professional system.
                     </p>
-                    <a href="#" class="btn btn-light hero-btn">Explore System</a>
+                    <a href="appointments.php" class="btn btn-light hero-btn">View Appointments</a>
                 </div>
             </div>
         </section>
@@ -150,30 +163,62 @@ $todayAppointments = $pdo->query(
             </div>
         </section>
 
-        <!-- Bottom Panels -->
+        <!-- Dashboard: real recent appointments and quick actions -->
         <section class="dashboard-panels mt-4">
             <div class="row g-4">
                 <div class="col-lg-8">
                     <div class="panel-card">
-                        <h5 class="panel-title">Recent Appointments</h5>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <h5 class="panel-title mb-1">Recent Appointments</h5>
+                                <p class="text-muted small mb-0">The five most recently added bookings</p>
+                            </div>
+                            <a href="appointments.php" class="btn btn-outline-primary btn-sm">
+                                View all <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+                            </a>
+                        </div>
                         <div class="table-responsive">
-                            <table class="table align-middle">
+                            <table class="table table-hover align-middle">
                                 <thead>
                                     <tr>
-                                        <th>Patient</th>
-                                        <th>Doctor</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
+                                        <th scope="col">Patient</th>
+                                        <th scope="col">Doctor</th>
+                                        <th scope="col">Date &amp; Time</th>
+                                        <th scope="col">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td colspan="4" class="text-center py-5">
-                                            <i class="bi bi-calendar-x text-secondary fs-2"></i>
-                                            <p class="text-muted mt-3 mb-0">No appointments available yet.</p>
-                                            <small class="text-muted">New appointments will appear here.</small>
-                                        </td>
-                                    </tr>
+                                    <?php if (empty($recentAppointments)): ?>
+                                        <tr>
+                                            <td colspan="4" class="text-center py-5">
+                                                <i class="bi bi-calendar-x text-secondary fs-2" aria-hidden="true"></i>
+                                                <p class="text-muted mt-3 mb-1">No appointments available yet.</p>
+                                                <a href="add_appointment.php" class="btn btn-primary btn-sm mt-2">
+                                                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Add Appointment
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($recentAppointments as $appointment): ?>
+                                            <tr>
+                                                <td><?php echo dashboardEscape($appointment['patient_name']); ?></td>
+                                                <td><?php echo dashboardEscape($appointment['doctor_name']); ?></td>
+                                                <td>
+                                                    <span class="d-block text-nowrap"><?php
+                                                        echo dashboardEscape(date('d M Y', strtotime($appointment['appointment_date'])));
+                                                    ?></span>
+                                                    <small class="text-muted"><?php
+                                                        echo dashboardEscape(date('g:i A', strtotime($appointment['appointment_time'])));
+                                                    ?></small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge <?php echo dashboardStatusClass((string) $appointment['status']); ?>">
+                                                        <?php echo dashboardEscape($appointment['status']); ?>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -181,28 +226,35 @@ $todayAppointments = $pdo->query(
                 </div>
                 <div class="col-lg-4">
                     <div class="panel-card quick-panel">
-                        <h5 class="panel-title">Quick Overview</h5>
-                        <div class="quick-item">
-                            <i class="bi bi-heart-pulse-fill"></i>
+                        <h5 class="panel-title">Quick Actions</h5>
+                        <a href="add_appointment.php" class="quick-item text-decoration-none">
+                            <i class="bi bi-calendar-plus-fill" aria-hidden="true"></i>
                             <div>
-                                <h6>System Status</h6>
-                                <p>All core modules are operating normally.</p>
+                                <h6 class="text-dark">Book Appointment</h6>
+                                <p>Schedule a visit for a patient.</p>
                             </div>
-                        </div>
-                        <div class="quick-item">
-                            <i class="bi bi-hospital-fill"></i>
+                        </a>
+                        <a href="add_patient.php" class="quick-item text-decoration-none">
+                            <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
                             <div>
-                                <h6>Hospital Info</h6>
-                                <p>General administration dashboard for daily operations.</p>
+                                <h6 class="text-dark">Add Patient</h6>
+                                <p>Register a new patient.</p>
                             </div>
-                        </div>
-                        <div class="quick-item">
-                            <i class="bi bi-clipboard2-pulse-fill"></i>
+                        </a>
+                        <a href="add_doctor.php" class="quick-item text-decoration-none">
+                            <i class="bi bi-person-badge-fill" aria-hidden="true"></i>
                             <div>
-                                <h6>Records</h6>
-                                <p>Manage patient records and appointments efficiently.</p>
+                                <h6 class="text-dark">Add Doctor</h6>
+                                <p>Register a new doctor.</p>
                             </div>
-                        </div>
+                        </a>
+                        <a href="medical_records.php" class="quick-item text-decoration-none">
+                            <i class="bi bi-file-earmark-medical-fill" aria-hidden="true"></i>
+                            <div>
+                                <h6 class="text-dark">Medical Records</h6>
+                                <p>Review registered medical records.</p>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>

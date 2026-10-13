@@ -1,0 +1,244 @@
+/* MediCore Step 11.3 - Responsive and accessibility improvements.
+   Add @import url("medicore-responsive.css?v=1"); as the FIRST line of
+   assets/css/style.css. Import rules intentionally use stronger selectors,
+   as the existing styles are loaded after imports. */
+
+/* Keep long content and large tables from stretching the whole page. */
+.main-wrapper > .content-area,
+.main-wrapper .panel-card,
+.main-wrapper .stat-card,
+.main-wrapper .topbar,
+.main-wrapper .table-responsive {
+    min-width: 0;
+}
+
+.main-wrapper .table-responsive {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Visible keyboard focus on the navigation and action buttons. */
+.main-wrapper .sidebar-menu a:focus-visible,
+.main-wrapper .sidebar-menu .logout-button:focus-visible,
+.main-wrapper .panel-card .btn:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.main-wrapper .panel-card td,
+.main-wrapper .panel-card th {
+    overflow-wrap: anywhere;
+}
+
+/* Make the desktop sidebar scroll if the browser window is short. */
+@media (min-width: 992px) {
+    .main-wrapper > .sidebar {
+        flex-shrink: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+}
+
+/* Tablet and mobile: swap the tall sidebar for a compact, swipeable menu. */
+@media (max-width: 991px) {
+    .main-wrapper > .sidebar {
+        width: 100%;
+        min-height: 0;
+        position: relative;
+        top: auto;
+        padding: 16px 18px 12px;
+    }
+
+    .main-wrapper > .sidebar .brand {
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .main-wrapper > .sidebar .brand-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 19px;
+    }
+
+    .main-wrapper > .sidebar .brand h4 {
+        font-size: 20px;
+    }
+
+    .main-wrapper > .sidebar .sidebar-menu {
+        display: flex;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 7px;
+        margin: 0;
+        padding: 0 0 8px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .main-wrapper > .sidebar .sidebar-menu > li {
+        flex: 0 0 auto;
+        margin: 0;
+    }
+
+    .main-wrapper > .sidebar .sidebar-menu > li > a,
+    .main-wrapper > .sidebar .sidebar-menu .logout-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: auto;
+        height: 100%;
+        padding: 10px 13px;
+        border: 0;
+        border-radius: 10px;
+        color: #dbeafe;
+        background: transparent;
+        font: inherit;
+        font-size: 14px;
+        line-height: 1.4;
+        white-space: nowrap;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .main-wrapper > .sidebar .sidebar-menu > li > a.active,
+    .main-wrapper > .sidebar .sidebar-menu > li > a:hover,
+    .main-wrapper > .sidebar .sidebar-menu .logout-button:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+    }
+
+    .main-wrapper > .sidebar .sidebar-menu li form {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .main-wrapper > .content-area {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .main-wrapper .topbar {
+        gap: 14px;
+    }
+
+    .main-wrapper .hero-banner,
+    .main-wrapper .hero-overlay {
+        min-height: 245px;
+    }
+
+    .main-wrapper .hero-overlay {
+        padding: 28px;
+    }
+
+    .main-wrapper .hero-text h1 {
+        font-size: clamp(25px, 4vw, 32px);
+        line-height: 1.2;
+    }
+}
+
+/* Phones: smaller padding and horizontal table scrolling instead of overflow. */
+@media (max-width: 575px) {
+    .main-wrapper > .sidebar {
+        padding: 13px 14px 10px;
+    }
+
+    .main-wrapper > .content-area {
+        padding: 14px;
+    }
+
+    .main-wrapper .topbar {
+        padding: 17px;
+        border-radius: 15px;
+    }
+
+    .main-wrapper .page-title {
+        font-size: 23px;
+        line-height: 1.25;
+    }
+
+    .main-wrapper .page-subtitle {
+        font-size: 14px;
+    }
+
+    .main-wrapper .admin-badge {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .main-wrapper .hero-banner,
+    .main-wrapper .hero-overlay {
+        min-height: 215px;
+        border-radius: 17px;
+    }
+
+    .main-wrapper .hero-overlay {
+        padding: 22px;
+    }
+
+    .main-wrapper .hero-text h1 {
+        font-size: 24px;
+    }
+
+    .main-wrapper .hero-text p {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .main-wrapper .stat-card {
+        padding: 19px;
+        border-radius: 16px;
+    }
+
+    .main-wrapper .stat-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 21px;
+        flex-shrink: 0;
+    }
+
+    .main-wrapper .panel-card {
+        padding: 18px;
+        border-radius: 16px;
+    }
+
+    .main-wrapper .panel-title {
+        font-size: 18px;
+    }
+
+    .main-wrapper .panel-card .table-responsive > table {
+        min-width: 650px;
+    }
+
+    .main-wrapper .panel-card table td,
+    .main-wrapper .panel-card table th {
+        padding: 11px 10px;
+        font-size: 13px;
+    }
+
+    .main-wrapper .panel-card form[role="search"] .btn {
+        width: 100%;
+    }
+
+    .main-wrapper .patient-form-card .form-control,
+    .main-wrapper .patient-form-card .form-select {
+        padding: 11px 12px;
+    }
+}
+
+/* Respect accessibility settings for reduced animation. */
+@media (prefers-reduced-motion: reduce) {
+    .main-wrapper .stat-card,
+    .main-wrapper .sidebar-menu a,
+    .main-wrapper .sidebar-menu .logout-button {
+        transition: none;
+        scroll-behavior: auto;
+    }
+
+    .main-wrapper .stat-card:hover {
+        transform: none;
+    }
+}

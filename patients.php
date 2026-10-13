@@ -1,22 +1,9 @@
 <?php
-
-// Match the session settings used by the rest of MediCore.
-session_set_cookie_params([
-    "httponly" => true,
-    "secure" => !empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off",
-    "samesite" => "Lax"
-]);
-
-session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate");
-
-// Prevent anonymous access.
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
+// Central authentication/session setup shared by MediCore protected pages.
+require_once __DIR__ . '/auth_guard.php';
 
 require_once __DIR__ . "/config/database.local.php";
+require_once __DIR__ . "/directory_search.php";
 
 $pageTitle = "Patients";
 
@@ -28,14 +15,39 @@ if (empty($_SESSION["logout_token"])) {
 $success = $_SESSION["patient_success"] ?? "";
 unset($_SESSION["patient_success"]);
 
-// Load actual patient records, newest first.
-$statement = $pdo->query(
-    "SELECT patient_id, full_name, date_of_birth, gender, phone, address
-     FROM patients
-     ORDER BY patient_id DESC"
+// Search by name/phone/ID, with an optional gender filter.
+$search = mdSearchText($_GET, 'q');
+$gender = mdSearchText($_GET, 'gender', 10);
+$allowedGenders = ['Male', 'Female', 'Other'];
+if (!in_array($gender, $allowedGenders, true)) {
+    $gender = '';
+}
+$conditions = [];
+$params = [];
+if ($search !== '') {
+    $parts = ["p.full_name LIKE :q_name ESCAPE '!'", "p.phone LIKE :q_phone ESCAPE '!'"];
+    $params['q_name'] = mdLikePattern($search);
+    $params['q_phone'] = mdLikePattern($search);
+    $searchedId = mdSearchId($search);
+    if ($searchedId !== null) {
+        $parts[] = 'p.patient_id = :q_id';
+        $params['q_id'] = $searchedId;
+    }
+    $conditions[] = '(' . implode(' OR ', $parts) . ')';
+}
+if ($gender !== '') {
+    $conditions[] = 'p.gender = :gender';
+    $params['gender'] = $gender;
+}
+$where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
+$statement = $pdo->prepare(
+    'SELECT p.patient_id, p.full_name, p.date_of_birth, p.gender, p.phone, p.address
+     FROM patients AS p' . $where . ' ORDER BY p.patient_id DESC'
 );
+$statement->execute($params);
 $patients = $statement->fetchAll(PDO::FETCH_ASSOC);
-$totalPatients = count($patients);
+$totalPatients = (int) $pdo->query('SELECT COUNT(*) FROM patients')->fetchColumn();
+$hasFilters = $search !== '' || $gender !== '';
 
 function escapeHtml($value): string
 {
@@ -124,6 +136,33 @@ function escapeHtml($value): string
                 </a>
             </div>
 
+            <form method="GET" action="patients.php" role="search" class="row g-3 align-items-end mb-3">
+                <div class="col-lg-6">
+                    <label for="patient_search" class="form-label fw-semibold">Search patients</label>
+                    <input id="patient_search" name="q" type="search" class="form-control"
+                           value="<?php echo escapeHtml($search); ?>" maxlength="100"
+                           placeholder="Name, phone or patient ID">
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label for="patient_gender" class="form-label fw-semibold">Gender</label>
+                    <select id="patient_gender" name="gender" class="form-select">
+                        <option value="">All genders</option>
+                        <?php foreach ($allowedGenders as $option): ?>
+                            <option value="<?php echo escapeHtml($option); ?>" <?php echo $gender === $option ? 'selected' : ''; ?>>
+                                <?php echo escapeHtml($option); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-3 d-flex flex-wrap gap-2">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i> Search</button>
+                    <a class="btn btn-outline-secondary" href="patients.php">Clear</a>
+                </div>
+            </form>
+            <p class="text-muted small mb-3" aria-live="polite">
+                Showing <?php echo count($patients); ?> of <?php echo $totalPatients; ?> patients<?php echo $hasFilters ? ' (filtered)' : ''; ?>.
+            </p>
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -142,9 +181,9 @@ function escapeHtml($value): string
                             <tr>
                                 <td colspan="7" class="text-center py-5">
                                     <i class="bi bi-people text-secondary fs-1"></i>
-                                    <h6 class="mt-3">No patients registered yet</h6>
+                                    <h6 class="mt-3"><?php echo $hasFilters ? 'No matching patients found' : 'No patients registered yet'; ?></h6>
                                     <p class="text-muted mb-0">
-                                        New patients will appear here once they are added.
+                                        <?php echo $hasFilters ? 'Try another name, phone, ID or gender, or click Clear.' : 'New patients will appear here once they are added.'; ?>
                                     </p>
                                 </td>
                             </tr>
