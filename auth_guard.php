@@ -1,3 +1,4 @@
+
 <?php
 /**
  * MediCore central authentication guard (PHP 8.2+, educational demo).
@@ -26,7 +27,11 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 
-if (!isset($_SESSION['user_id']) || !is_int($_SESSION['user_id']) || $_SESSION['user_id'] < 1) {
+if (
+    !isset($_SESSION['user_id']) ||
+    !is_int($_SESSION['user_id']) ||
+    $_SESSION['user_id'] < 1
+) {
     header('Location: login.php');
     exit;
 }
@@ -34,10 +39,16 @@ if (!isset($_SESSION['user_id']) || !is_int($_SESSION['user_id']) || $_SESSION['
 // End sessions after 30 minutes without activity on protected pages.
 $medicoreNow = time();
 $medicoreLastActivity = $_SESSION['medicore_last_activity'] ?? null;
-if (is_int($medicoreLastActivity) && $medicoreNow - $medicoreLastActivity > 1800) {
+
+if (
+    is_int($medicoreLastActivity) &&
+    $medicoreNow - $medicoreLastActivity > 1800
+) {
     $_SESSION = [];
+
     if (ini_get('session.use_cookies')) {
         $cookie = session_get_cookie_params();
+
         setcookie(session_name(), '', [
             'expires' => time() - 3600,
             'path' => $cookie['path'],
@@ -47,8 +58,16 @@ if (is_int($medicoreLastActivity) && $medicoreNow - $medicoreLastActivity > 1800
             'samesite' => $cookie['samesite'] ?? 'Lax',
         ]);
     }
+
     session_destroy();
     header('Location: login.php?expired=1');
     exit;
 }
+
 $_SESSION['medicore_last_activity'] = $medicoreNow;
+
+// Create a CSRF token for the secure logout form.
+// This prevents the "Undefined array key: logout_token" warning.
+if (empty($_SESSION['logout_token'])) {
+    $_SESSION['logout_token'] = bin2hex(random_bytes(32));
+}
