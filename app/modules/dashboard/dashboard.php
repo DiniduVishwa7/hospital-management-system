@@ -72,7 +72,7 @@ function dashboardStatusClass(string $status): string
 
         <ul class="sidebar-menu">
             <li><a href="<?php echo dashboardEscape(medicore_url('dashboard')); ?>" class="active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-people-fill"></i> Patients</a></li>
+            <li><a href="<?php echo dashboardEscape(medicore_url('patients')); ?>"><i class="bi bi-people-fill"></i> Patients</a></li>
             <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
             <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
             <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
@@ -234,7 +234,7 @@ function dashboardStatusClass(string $status): string
                                 <p>Schedule a visit for a patient.</p>
                             </div>
                         </a>
-                        <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="quick-item text-decoration-none">
+                        <a href="<?php echo dashboardEscape(medicore_url('patients/create')); ?>" class="quick-item text-decoration-none">
                             <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
                             <div>
                                 <h6 class="text-dark">Add Patient</h6>
