@@ -18,7 +18,7 @@ The seven screenshots already exist under `docs/screenshots/` and are linked fro
 
 ## Capture instructions (Windows / Chrome)
 
-1. Open `http://localhost/hospital-management-system/login.php` in Chrome and sign in using an administrator account created locally. Use the original root page URLs; internal `modules/` pages are blocked by Apache.
+1. Open `http://127.0.0.1/hospital-management-system/public/index.php?route=login` in Chrome and sign in using an administrator account created locally. Use front-controller routes such as `index.php?route=patients`; internal `app/modules/` pages are blocked by Apache. See Local Setup for public-only deployment URLs.
 2. Fill the demo database **only with fictional records**. Avoid uploading the actual database export to GitHub.
 3. For each screen, close unrelated windows/tabs, hide personal bookmarks if visible, and use Windows **Win + Shift + S** to capture the app content.
 4. Save images as **PNG** under the project's `docs/screenshots/` folder using the filenames above.

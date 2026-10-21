@@ -1,0 +1,5 @@
+# Temporary htdocs containment: only public/ may be served over HTTP.
+# A public-only Apache DocumentRoot or Alias is still a deployment step.
+Options -Indexes
+RewriteEngine On
+RewriteRule !^public(?:/|$) - [F,END,NC]

@@ -74,17 +74,48 @@ MediCore interface optimized for smaller screens.
 
 ## Project structure
 
-This tree is generated from the repository file inventory after the module moves. It also shows the existing local-only database configuration; `.git/` internals are omitted.
+Application tree (`.git/` omitted; `config/database.local.php` is local and untracked):
 
 ```text
 hospital-management-system/
-├── assets/
-│   ├── css/
-│   │   ├── login.css
-│   │   ├── medicore-responsive.css
-│   │   └── style.css
-│   └── images/
-│       └── hospital-banner.avif
+├── app/
+│   ├── modules/
+│   │   ├── appointments/
+│   │   │   ├── add_appointment.php
+│   │   │   ├── appointment_common.php
+│   │   │   ├── appointments.php
+│   │   │   ├── delete_appointment.php
+│   │   │   └── edit_appointment.php
+│   │   ├── auth/
+│   │   │   ├── login.php
+│   │   │   └── logout.php
+│   │   ├── dashboard/
+│   │   │   └── dashboard.php
+│   │   ├── doctors/
+│   │   │   ├── add_doctor.php
+│   │   │   ├── delete_doctor.php
+│   │   │   ├── doctors.php
+│   │   │   └── edit_doctor.php
+│   │   ├── medical-records/
+│   │   │   ├── add_medical_record.php
+│   │   │   ├── delete_medical_record.php
+│   │   │   ├── edit_medical_record.php
+│   │   │   ├── medical_record_common.php
+│   │   │   ├── medical_records.php
+│   │   │   └── view_medical_record.php
+│   │   └── patients/
+│   │       ├── add_patient.php
+│   │       ├── delete_patient.php
+│   │       ├── edit_patient.php
+│   │       └── patients.php
+│   ├── shared/
+│   │   ├── .htaccess
+│   │   ├── auth_guard.php
+│   │   ├── bootstrap.php
+│   │   ├── directory_search.php
+│   │   └── urls.php
+│   ├── .htaccess
+│   └── routes.php
 ├── config/
 │   ├── .htaccess
 │   └── database.local.php
@@ -103,87 +134,77 @@ hospital-management-system/
 │   ├── LOCAL_SETUP.md
 │   ├── SCREENSHOT_GUIDE.md
 │   └── SECURITY_REVIEW.md
-├── includes/
+├── public/
+│   ├── assets/
+│   │   ├── css/
+│   │   │   ├── login.css
+│   │   │   ├── medicore-responsive.css
+│   │   │   └── style.css
+│   │   └── images/
+│   │       └── hospital-banner.avif
 │   ├── .htaccess
-│   ├── auth_guard.php
-│   └── directory_search.php
-├── modules/
-│   ├── appointments/
-│   │   ├── add_appointment.php
-│   │   ├── appointment_common.php
-│   │   ├── appointments.php
-│   │   ├── delete_appointment.php
-│   │   └── edit_appointment.php
-│   ├── doctors/
-│   │   ├── add_doctor.php
-│   │   ├── delete_doctor.php
-│   │   ├── doctors.php
-│   │   └── edit_doctor.php
-│   ├── medical-records/
-│   │   ├── add_medical_record.php
-│   │   ├── delete_medical_record.php
-│   │   ├── edit_medical_record.php
-│   │   ├── medical_record_common.php
-│   │   ├── medical_records.php
-│   │   └── view_medical_record.php
-│   ├── patients/
-│   │   ├── add_patient.php
-│   │   ├── delete_patient.php
-│   │   ├── edit_patient.php
-│   │   └── patients.php
-│   └── .htaccess
+│   └── index.php
 ├── .gitattributes
 ├── .gitignore
-├── README.md
-├── add_appointment.php
-├── add_doctor.php
-├── add_medical_record.php
-├── add_patient.php
-├── appointment_common.php
-├── appointments.php
-├── auth_guard.php
-├── delete_appointment.php
-├── delete_doctor.php
-├── delete_medical_record.php
-├── delete_patient.php
-├── directory_search.php
-├── doctors.php
-├── edit_appointment.php
-├── edit_doctor.php
-├── edit_medical_record.php
-├── edit_patient.php
-├── index.php
-├── login.php
-├── logout.php
-├── medical_record_common.php
-├── medical_records.php
-├── patients.php
-└── view_medical_record.php
+├── .htaccess
+└── README.md
 ```
 
-`config/database.local.php` is created locally and excluded from version control. The current `assets/` folder contains CSS and an image; there are no standalone JavaScript files.
+The superseded root `assets/`, `includes/`, and `modules/` directories have been removed. There are no root PHP wrappers or duplicate PHP implementations; application code is under `app/`, and browser assets are under `public/assets/`.
 
 ### Application architecture
 
-- **Public entry points:** `index.php` serves the dashboard; `login.php` and `logout.php` handle sign-in and token-protected POST logout.
-- **Compatibility wrappers:** root CRUD files such as `patients.php` and `edit_appointment.php` use `require __DIR__` to execute their implementations under `modules/` in the same request. Existing browser URLs, query parameters, GET/POST submissions, redirects, navigation, and asset references are preserved. Root `auth_guard.php`, `directory_search.php`, `appointment_common.php`, and `medical_record_common.php` remain `require_once` compatibility shims.
-- **Shared helpers:** `includes/auth_guard.php` checks the authenticated session, applies the 30-minute inactivity timeout and security headers, and initializes `logout_token`. `includes/directory_search.php` provides shared search-input helpers. Login and logout retain their separate session startup.
-- **CRUD modules:** `modules/patients/`, `modules/doctors/`, `modules/appointments/`, and `modules/medical-records/` contain the four implementations. Appointment and medical-record common helpers live alongside their pages. Module-local includes use `__DIR__`; project-level includes use `dirname(__DIR__, 2)`.
-- **Database integration:** PHP uses PDO and the locally configured `$pdo` connection from `config/database.local.php` to access MySQL/MariaDB. The schema remains in `database/hospital_management.sql`. Prepared statements, validation, CSRF checks for login and mutations, HTML escaping, and existing transaction/conflict checks remain in the application.
-- **HTTP restrictions:** `includes/.htaccess` and `modules/.htaccess` contain `Require all denied`; all four module folders inherit the latter rule. Existing restrictions also protect `config/` and `database/`. Apache must honor these files. PHP filesystem includes continue to work; users browse the original root URLs rather than internal implementations.
+- `public/index.php` is the sole PHP web entry point. All 20 routes use a fixed allowlist in `app/routes.php`; request values never form PHP filenames.
+- `app/shared/bootstrap.php` defines trusted paths and loads URL helpers without starting a session or connecting to MySQL. `urls.php` builds local route/asset URLs and redirects from the validated `MEDICORE_BASE_PATH` deployment setting, never the Host header.
+- `app/shared/auth_guard.php` protects the dashboard and CRUD routes before database access, with the existing 30-minute timeout, security headers, and logout-token initialization. Login and logout retain their own session startup.
+- `app/modules/` contains authentication, dashboard, and four CRUD modules. Common appointment/medical-record functions remain beside their pages. Module-local dependencies use `__DIR__`; shared/configuration paths use trusted root constants.
+- PHP/PDO loads the unchanged private `config/database.local.php` connection only from handlers that need it. SQL, bindings, transactions, conflict rules, validation, CSRF tokens, deletion restrictions, and flash messages are retained.
+- Local CSS and the banner are under `public/assets/`. There are no standalone JavaScript files. External Bootstrap, Bootstrap Icons, and font URLs remain unchanged.
+- Root `.htaccess` blocks HTTP paths outside `public/`; `app/` and `app/shared/` also deny direct access. Existing `config/` and `database/` restrictions remain intact. This containment depends on Apache honoring the rules; it does not itself change the server document root.
 
-See [Local Setup](docs/LOCAL_SETUP.md), the [Screenshot Guide](docs/SCREENSHOT_GUIDE.md), and the [Security Review](docs/SECURITY_REVIEW.md).
+### Routes
+
+Use `http://127.0.0.1/hospital-management-system/public/index.php?route=ROUTE` during current XAMPP development. Omitting `route` selects the authenticated dashboard. All routes below are enabled.
+
+| Route | Methods | Access |
+| --- | --- | --- |
+| `dashboard` | GET | Authenticated |
+| `login` | GET, POST | Public/session-token validation |
+| `logout` | POST | Public/session-token validation |
+| `patients` | GET | Authenticated |
+| `patients/create` | GET, POST | Authenticated |
+| `patients/edit` | GET, POST | Authenticated |
+| `patients/delete` | GET, POST | Authenticated |
+| `doctors` | GET | Authenticated |
+| `doctors/create` | GET, POST | Authenticated |
+| `doctors/edit` | GET, POST | Authenticated |
+| `doctors/delete` | GET, POST | Authenticated |
+| `appointments` | GET | Authenticated |
+| `appointments/create` | GET, POST | Authenticated |
+| `appointments/edit` | GET, POST | Authenticated |
+| `appointments/delete` | GET, POST | Authenticated |
+| `medical-records` | GET | Authenticated |
+| `medical-records/create` | GET, POST | Authenticated |
+| `medical-records/view` | GET | Authenticated |
+| `medical-records/edit` | GET, POST | Authenticated |
+| `medical-records/delete` | GET, POST | Authenticated |
+
+Edit/view/confirmation links retain `id`; edit POST actions retain it too. Delete POSTs keep their original body identifier and confirmation fields. Search forms keep hidden route selectors and their existing filters: patients `q/gender`, doctors `q/specialization`, appointments `q/status/date`, and medical records `q/from/to`.
+
+Legacy URLs such as `patients.php` and `login.php` at the project root have been retired. They do not forward to old implementations. Use the front-controller routes.
+
+See [Local Setup](docs/LOCAL_SETUP.md), [Screenshot Guide](docs/SCREENSHOT_GUIDE.md), and [Security Review](docs/SECURITY_REVIEW.md).
 
 ## Run locally
 
-**Requirements:** PHP 8.2 with `pdo_mysql` and `mbstring`, a MySQL/MariaDB server, and Apache with the project's `.htaccess` protection enabled. The steps below use XAMPP on Windows. No Composer or npm installation is required by the current project.
+**Requirements:** PHP 8.2 with `pdo_mysql` and `mbstring`, a MySQL/MariaDB server, and Apache 2.4 with `mod_rewrite`, `mod_authz_core`, and the project's `.htaccess` protection enabled. The steps below use XAMPP on Windows. No Composer or npm installation is required by the current project.
 
 1. Clone or download this repository into the XAMPP web root, e.g. `D:\Projects\xampp\htdocs\hospital-management-system`.
 2. Start **Apache** and **MySQL** from XAMPP.
 3. Open phpMyAdmin, create a database called `hospital_management`, and import `database/hospital_management.sql` (the schema-only export).
 4. Create `config/database.local.php` with your own **local** PDO connection settings; do not commit this file. See [Local Setup](docs/LOCAL_SETUP.md) for a safe example.
 5. Create an administrator account locally with a `password_hash()`-generated password hash. The repository intentionally provides **no default administrator credentials**. See [Local Setup](docs/LOCAL_SETUP.md).
-6. Visit `http://localhost/hospital-management-system/login.php` and sign in.
+6. Visit `http://127.0.0.1/hospital-management-system/public/index.php?route=login` and sign in.
 
 The imported schema contains the five main application tables: `users`, `patients`, `doctors`, `appointments`, and `medical_records`. No demo patients or account credentials are bundled.
 
@@ -205,7 +226,7 @@ flowchart LR
 
 The demo includes password hashing/verification, PDO prepared statements, CSRF tokens for state-changing forms, HTML output escaping, authenticated page guards, inactivity timeout, and Apache access restrictions for sensitive folders.
 
-**Known limitations:** Persistent login-attempt throttling has **not** been installed; administrator roles and fine-grained permissions, audit logging, encryption policies, and healthcare-specific retention controls are not implemented. Some demo CRUD operations permanently delete records. Same-time appointment conflict checks are implemented at application level and are not a substitute for database-level concurrency controls. Do not expose this project to the public internet or use real medical data without a substantial security and compliance review.
+**Known limitations:** Persistent login-attempt throttling has **not** been installed; administrator roles and fine-grained permissions, audit logging, encryption policies, and healthcare-specific retention controls are not implemented. Some demo CRUD operations permanently delete records. Same-time appointment conflict checks are implemented at application level and are not a substitute for database-level concurrency controls. The Apache public-only cutover remains a deployment step; see Local Setup for virtual-host and Alias options. Do not expose this project to the public internet or use real medical data without a substantial security and compliance review.
 
 ## Future improvements
 

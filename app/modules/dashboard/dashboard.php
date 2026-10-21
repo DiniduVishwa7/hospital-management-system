@@ -73,9 +73,9 @@ function dashboardStatusClass(string $status): string
         <ul class="sidebar-menu">
             <li><a href="<?php echo dashboardEscape(medicore_url('dashboard')); ?>" class="active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
             <li><a href="<?php echo dashboardEscape(medicore_url('patients')); ?>"><i class="bi bi-people-fill"></i> Patients</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
+            <li><a href="<?php echo dashboardEscape(medicore_url('doctors')); ?>"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
+            <li><a href="<?php echo dashboardEscape(medicore_url('appointments')); ?>"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
+            <li><a href="<?php echo dashboardEscape(medicore_url('medical-records')); ?>"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
             <li>
                 <form action="<?php echo dashboardEscape(medicore_url('logout')); ?>" method="POST">
                     <input
@@ -116,7 +116,7 @@ function dashboardStatusClass(string $status): string
                         Manage patients, doctors, appointments, and medical records
                         from one clean and professional system.
                     </p>
-                    <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="btn btn-light hero-btn">View Appointments</a>
+                    <a href="<?php echo dashboardEscape(medicore_url('appointments')); ?>" class="btn btn-light hero-btn">View Appointments</a>
                 </div>
             </div>
         </section>
@@ -173,7 +173,7 @@ function dashboardStatusClass(string $status): string
                                 <h5 class="panel-title mb-1">Recent Appointments</h5>
                                 <p class="text-muted small mb-0">The five most recently added bookings</p>
                             </div>
-                            <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="btn btn-outline-primary btn-sm">
+                            <a href="<?php echo dashboardEscape(medicore_url('appointments')); ?>" class="btn btn-outline-primary btn-sm">
                                 View all <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
                             </a>
                         </div>
@@ -193,7 +193,7 @@ function dashboardStatusClass(string $status): string
                                             <td colspan="4" class="text-center py-5">
                                                 <i class="bi bi-calendar-x text-secondary fs-2" aria-hidden="true"></i>
                                                 <p class="text-muted mt-3 mb-1">No appointments available yet.</p>
-                                                <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="btn btn-primary btn-sm mt-2">
+                                                <a href="<?php echo dashboardEscape(medicore_url('appointments/create')); ?>" class="btn btn-primary btn-sm mt-2">
                                                     <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Add Appointment
                                                 </a>
                                             </td>
@@ -227,7 +227,7 @@ function dashboardStatusClass(string $status): string
                 <div class="col-lg-4">
                     <div class="panel-card quick-panel">
                         <h5 class="panel-title">Quick Actions</h5>
-                        <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="quick-item text-decoration-none">
+                        <a href="<?php echo dashboardEscape(medicore_url('appointments/create')); ?>" class="quick-item text-decoration-none">
                             <i class="bi bi-calendar-plus-fill" aria-hidden="true"></i>
                             <div>
                                 <h6 class="text-dark">Book Appointment</h6>
@@ -241,14 +241,14 @@ function dashboardStatusClass(string $status): string
                                 <p>Register a new patient.</p>
                             </div>
                         </a>
-                        <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="quick-item text-decoration-none">
+                        <a href="<?php echo dashboardEscape(medicore_url('doctors/create')); ?>" class="quick-item text-decoration-none">
                             <i class="bi bi-person-badge-fill" aria-hidden="true"></i>
                             <div>
                                 <h6 class="text-dark">Add Doctor</h6>
                                 <p>Register a new doctor.</p>
                             </div>
                         </a>
-                        <a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable" class="quick-item text-decoration-none">
+                        <a href="<?php echo dashboardEscape(medicore_url('medical-records')); ?>" class="quick-item text-decoration-none">
                             <i class="bi bi-file-earmark-medical-fill" aria-hidden="true"></i>
                             <div>
                                 <h6 class="text-dark">Medical Records</h6>

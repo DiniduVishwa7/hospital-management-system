@@ -1,2 +1,0 @@
-# Block direct HTTP access; PHP require/include continues to work.
-Require all denied

@@ -177,9 +177,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <ul class="sidebar-menu">
             <li><a href="<?php echo escapeHtml(medicore_url('dashboard')); ?>"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
             <li><a href="<?php echo escapeHtml(medicore_url('patients')); ?>" class="active"><i class="bi bi-people-fill"></i> Patients</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
-            <li><a aria-disabled="true" role="link" tabindex="-1" title="Currently unavailable"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
+            <li><a href="<?php echo escapeHtml(medicore_url('doctors')); ?>"><i class="bi bi-person-badge-fill"></i> Doctors</a></li>
+            <li><a href="<?php echo escapeHtml(medicore_url('appointments')); ?>"><i class="bi bi-calendar2-check-fill"></i> Appointments</a></li>
+            <li><a href="<?php echo escapeHtml(medicore_url('medical-records')); ?>"><i class="bi bi-file-earmark-medical-fill"></i> Medical Records</a></li>
             <li>
                 <form action="<?php echo escapeHtml(medicore_url('logout')); ?>" method="POST">
                     <input
