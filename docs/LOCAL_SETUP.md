@@ -4,6 +4,8 @@ This guide is for the **local educational demonstration** only. Use fictional da
 
 ## 1. Place the project in XAMPP
 
+Use PHP 8.2 with `pdo_mysql` and `mbstring`, Apache, and MySQL/MariaDB. XAMPP provides the local server environment; check that both PHP extensions are enabled in the PHP configuration Apache uses. The current project has no Composer or npm dependency installation step.
+
 Example Windows installation:
 
 ```text
@@ -11,6 +13,8 @@ D:\Projects\xampp\htdocs\hospital-management-system
 ```
 
 Start **Apache** and **MySQL** using the XAMPP Control Panel.
+
+Apache must honor the existing `.htaccess` files in `config/`, `database/`, `includes/`, and `modules/`. The access rules require `mod_authz_core` and an `AllowOverride` setting that permits authorization directives, such as `AuthConfig` or `All`. Do not remove or weaken these rules to resolve a setup problem.
 
 ## 2. Create and import the database
 
@@ -67,11 +71,16 @@ http://localhost/hospital-management-system/login.php
 
 Sign in with the administrator account you created locally. The dashboard should then display live counts from MySQL.
 
+The folder restructuring does not change this URL or the root CRUD URLs such as `patients.php`, `doctors.php`, `appointments.php`, and `medical_records.php`. Their root compatibility wrappers execute the implementations in `modules/` without redirecting the request. Open the root pages through Apache; internal module files and shared `includes/` helpers are intentionally blocked over HTTP.
+
+All file paths in the setup examples above are relative to the project root unless shown as absolute paths. See the [README architecture](../README.md#application-architecture) and [Security Review](SECURITY_REVIEW.md) for the current layout and limitations.
+
 ## 6. Troubleshooting
 
 - **Can't connect to database:** confirm both XAMPP services are running and local connection settings match your installation.
 - **Login doesn't work:** verify that the `users` record contains a password hash created with PHP `password_hash()`.
-- **403 for `/config` or `/database`:** this is expected when Apache folder protection is enabled.
+- **403 for project URLs under `/config`, `/database`, `/includes`, or `/modules`:** this is expected when Apache folder protection is enabled. Use root entry URLs such as `patients.php` instead of `modules/patients/patients.php`.
+- **Internal PHP files are accessible over HTTP, or an access-rule error appears:** check Apache's authorization module, `AllowOverride` setting, and error log. Keep the existing `.htaccess` files intact.
 - **Page looks unstyled:** check local CSS paths and refresh your browser cache.
 - **MariaDB startup trouble:** do not remove database files or perform a recovery without a backup. Inspect the MySQL error log first.
 

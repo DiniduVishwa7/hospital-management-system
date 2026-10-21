@@ -74,45 +74,109 @@ MediCore interface optimized for smaller screens.
 
 ## Project structure
 
+This tree is generated from the repository file inventory after the module moves. It also shows the existing local-only database configuration; `.git/` internals are omitted.
+
 ```text
 hospital-management-system/
 ├── assets/
 │   ├── css/
-│   │   ├── style.css
 │   │   ├── login.css
-│   │   └── medicore-responsive.css
+│   │   ├── medicore-responsive.css
+│   │   └── style.css
 │   └── images/
+│       └── hospital-banner.avif
 ├── config/
-│   └── .htaccess
+│   ├── .htaccess
+│   └── database.local.php
 ├── database/
-│   ├── hospital_management.sql
-│   └── .htaccess
+│   ├── .htaccess
+│   └── hospital_management.sql
 ├── docs/
+│   ├── screenshots/
+│   │   ├── appointments.png
+│   │   ├── dashboard.png
+│   │   ├── doctors.png
+│   │   ├── login.png
+│   │   ├── medical-records.png
+│   │   ├── mobile.png
+│   │   └── patients.png
 │   ├── LOCAL_SETUP.md
 │   ├── SCREENSHOT_GUIDE.md
-│   └── screenshots/
-├── auth_guard.php
-├── directory_search.php
+│   └── SECURITY_REVIEW.md
+├── includes/
+│   ├── .htaccess
+│   ├── auth_guard.php
+│   └── directory_search.php
+├── modules/
+│   ├── appointments/
+│   │   ├── add_appointment.php
+│   │   ├── appointment_common.php
+│   │   ├── appointments.php
+│   │   ├── delete_appointment.php
+│   │   └── edit_appointment.php
+│   ├── doctors/
+│   │   ├── add_doctor.php
+│   │   ├── delete_doctor.php
+│   │   ├── doctors.php
+│   │   └── edit_doctor.php
+│   ├── medical-records/
+│   │   ├── add_medical_record.php
+│   │   ├── delete_medical_record.php
+│   │   ├── edit_medical_record.php
+│   │   ├── medical_record_common.php
+│   │   ├── medical_records.php
+│   │   └── view_medical_record.php
+│   ├── patients/
+│   │   ├── add_patient.php
+│   │   ├── delete_patient.php
+│   │   ├── edit_patient.php
+│   │   └── patients.php
+│   └── .htaccess
+├── .gitattributes
+├── .gitignore
+├── README.md
+├── add_appointment.php
+├── add_doctor.php
+├── add_medical_record.php
+├── add_patient.php
 ├── appointment_common.php
-├── medical_record_common.php
+├── appointments.php
+├── auth_guard.php
+├── delete_appointment.php
+├── delete_doctor.php
+├── delete_medical_record.php
+├── delete_patient.php
+├── directory_search.php
+├── doctors.php
+├── edit_appointment.php
+├── edit_doctor.php
+├── edit_medical_record.php
+├── edit_patient.php
 ├── index.php
 ├── login.php
 ├── logout.php
-├── patients.php
-├── doctors.php
-├── appointments.php
+├── medical_record_common.php
 ├── medical_records.php
-├── add_*.php
-├── edit_*.php
-├── delete_*.php
-└── README.md
+├── patients.php
+└── view_medical_record.php
 ```
 
-*Selected files shown. The `config/database.local.php` file is created locally and deliberately excluded from version control.*
+`config/database.local.php` is created locally and excluded from version control. The current `assets/` folder contains CSS and an image; there are no standalone JavaScript files.
+
+### Application architecture
+
+- **Public entry points:** `index.php` serves the dashboard; `login.php` and `logout.php` handle sign-in and token-protected POST logout.
+- **Compatibility wrappers:** root CRUD files such as `patients.php` and `edit_appointment.php` use `require __DIR__` to execute their implementations under `modules/` in the same request. Existing browser URLs, query parameters, GET/POST submissions, redirects, navigation, and asset references are preserved. Root `auth_guard.php`, `directory_search.php`, `appointment_common.php`, and `medical_record_common.php` remain `require_once` compatibility shims.
+- **Shared helpers:** `includes/auth_guard.php` checks the authenticated session, applies the 30-minute inactivity timeout and security headers, and initializes `logout_token`. `includes/directory_search.php` provides shared search-input helpers. Login and logout retain their separate session startup.
+- **CRUD modules:** `modules/patients/`, `modules/doctors/`, `modules/appointments/`, and `modules/medical-records/` contain the four implementations. Appointment and medical-record common helpers live alongside their pages. Module-local includes use `__DIR__`; project-level includes use `dirname(__DIR__, 2)`.
+- **Database integration:** PHP uses PDO and the locally configured `$pdo` connection from `config/database.local.php` to access MySQL/MariaDB. The schema remains in `database/hospital_management.sql`. Prepared statements, validation, CSRF checks for login and mutations, HTML escaping, and existing transaction/conflict checks remain in the application.
+- **HTTP restrictions:** `includes/.htaccess` and `modules/.htaccess` contain `Require all denied`; all four module folders inherit the latter rule. Existing restrictions also protect `config/` and `database/`. Apache must honor these files. PHP filesystem includes continue to work; users browse the original root URLs rather than internal implementations.
+
+See [Local Setup](docs/LOCAL_SETUP.md), the [Screenshot Guide](docs/SCREENSHOT_GUIDE.md), and the [Security Review](docs/SECURITY_REVIEW.md).
 
 ## Run locally
 
-**Requirements:** PHP 8.2 with `pdo_mysql`, a MySQL/MariaDB server, and a local PHP-capable web server. The steps below use XAMPP on Windows.
+**Requirements:** PHP 8.2 with `pdo_mysql` and `mbstring`, a MySQL/MariaDB server, and Apache with the project's `.htaccess` protection enabled. The steps below use XAMPP on Windows. No Composer or npm installation is required by the current project.
 
 1. Clone or download this repository into the XAMPP web root, e.g. `D:\Projects\xampp\htdocs\hospital-management-system`.
 2. Start **Apache** and **MySQL** from XAMPP.

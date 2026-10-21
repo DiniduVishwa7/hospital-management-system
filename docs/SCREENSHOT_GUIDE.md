@@ -2,9 +2,11 @@
 
 Good screenshots demonstrate the UI and CRUD features, but **do not include real patient information, login credentials, browser profile details, or private URLs**.
 
-## Recommended screenshots
+The seven screenshots already exist under `docs/screenshots/` and are linked from the [README](../README.md). The folder restructuring preserves their filenames, contents, locations, and existing README image links.
 
-| File to create | Screen | What to show |
+## Existing screenshots
+
+| Filename | Screen | What to show |
 | --- | --- | --- |
 | `dashboard.png` | Dashboard | Navy sidebar, cards, recent appointments, quick actions |
 | `login.png` | Admin login | Split-screen design; leave password field blank |
@@ -16,14 +18,16 @@ Good screenshots demonstrate the UI and CRUD features, but **do not include real
 
 ## Capture instructions (Windows / Chrome)
 
-1. Open MediCore in Chrome and sign in using the local test administrator account.
+1. Open `http://localhost/hospital-management-system/login.php` in Chrome and sign in using an administrator account created locally. Use the original root page URLs; internal `modules/` pages are blocked by Apache.
 2. Fill the demo database **only with fictional records**. Avoid uploading the actual database export to GitHub.
 3. For each screen, close unrelated windows/tabs, hide personal bookmarks if visible, and use Windows **Win + Shift + S** to capture the app content.
 4. Save images as **PNG** under the project's `docs/screenshots/` folder using the filenames above.
 5. Review each screenshot carefully for sensitive information before staging it in GitHub Desktop.
-6. When all images are ready, edit the main `README.md`: replace the Screenshots paragraph with the image links below.
+6. For any separately approved future screenshot update, keep the existing README links and filenames. This documentation update does not require recapturing or replacing any images.
 
-## Markdown to paste into README when ready
+## README image-link reference
+
+The following example paths are relative to the root `README.md`, not this guide. The README already contains the screenshot links.
 
 ```markdown
 ## Screenshots
@@ -50,4 +54,4 @@ Good screenshots demonstrate the UI and CRUD features, but **do not include real
 ![Responsive MediCore Interface](docs/screenshots/mobile.png)
 ```
 
-**Tip:** The screenshot section in the bundled README is deliberately text-only until you've actually added the images, to avoid broken image links on GitHub.
+**Tip:** Preview the README on GitHub after documentation changes to confirm all seven existing images render. See [Local Setup](LOCAL_SETUP.md) if the application is not running.
