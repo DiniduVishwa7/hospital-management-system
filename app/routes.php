@@ -10,19 +10,19 @@ return [
         'file' => __DIR__ . '/modules/dashboard/dashboard.php',
         'methods' => ['GET'],
         'auth' => true,
-        'available' => false,
+        'available' => true,
     ],
     'login' => [
         'file' => __DIR__ . '/modules/auth/login.php',
         'methods' => ['GET', 'POST'],
         'auth' => false,
-        'available' => false,
+        'available' => true,
     ],
     'logout' => [
         'file' => __DIR__ . '/modules/auth/logout.php',
         'methods' => ['POST'],
         'auth' => false,
-        'available' => false,
+        'available' => true,
     ],
     'patients' => [
         'file' => __DIR__ . '/modules/patients/patients.php',

@@ -40,7 +40,7 @@ if (!in_array($medicoreMethod, $medicoreDefinition['methods'], true)) {
     medicore_route_error(405, 'Method not allowed.', $medicoreDefinition['methods']);
 }
 
-// All handlers remain unavailable in Stage 1, even if a file appears later.
+// Unavailable routes never fall back to the original application.
 if (!$medicoreDefinition['available'] || !is_file($medicoreDefinition['file'])) {
     medicore_route_error(404, 'Route unavailable.');
 }
