@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/medical_record_common.php';
-require_once __DIR__ . '/directory_search.php';
+require_once __DIR__ . '/includes/directory_search.php';
 
 // Search by patient/doctor/diagnosis; optional inclusive record-date range.
 $search = mdSearchText($_GET, 'q');

@@ -1,9 +1,9 @@
 <?php
 // Central authentication/session setup shared by MediCore protected pages.
-require_once __DIR__ . '/auth_guard.php';
+require_once __DIR__ . '/includes/auth_guard.php';
 
 require_once __DIR__ . "/config/database.local.php";
-require_once __DIR__ . "/directory_search.php";
+require_once __DIR__ . "/includes/directory_search.php";
 
 $pageTitle = "Doctors";
 
