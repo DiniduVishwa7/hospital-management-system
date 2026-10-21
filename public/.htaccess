@@ -1,0 +1,9 @@
+# Query-string routes use index.php directly; no URL rewriting is enabled.
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+AcceptPathInfo Off
+
+# Reject alternate PHP entry-point filenames throughout the public tree.
+<FilesMatch "(?i)^(?!index[.]php$).*[.](?:php[0-9]*|phtml|phar)$">
+    Require all denied
+</FilesMatch>

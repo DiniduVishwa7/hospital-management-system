@@ -1,0 +1,2 @@
+# Deny direct HTTP access; PHP filesystem includes remain available.
+Require all denied
